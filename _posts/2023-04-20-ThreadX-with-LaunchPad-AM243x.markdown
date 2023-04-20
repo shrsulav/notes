@@ -29,6 +29,20 @@ Editing and building the MCU SDK libraries outside of CCStudio can be cumbersome
 
 Go ahead and commit the changes till this point.
 
+#### Mode of Operation for ThreadX
+The MCU SDK provides a lot of examples for no-RTOS and FreeRTOS bases. If we check the source code related to bootup, we will see that when the execution of reaches `main()`, the processor is operating in the `SYSTEM` mode. The FreeRTOS kernel works in the `SYSTEM` mode, whereas the FreeRTOS threads work in the `SVC` mode. For ThreadX, the kernel and the threads both work in the `SVC` mode. So, we have two choices (maybe we have more but I am limiting myself to the two at the moment). One is that we let the mode be `SYSTEM` when execution reaches `main()` and then later change the mode to `SVC`. The other choice is that we start `main()` with `SVC` mode. I have taken the second choice. To implement the choice I have taken, change the `boot` file such that after setting up the stacks for different modes, the last mode is `SVC`. You will notice that by default, the last mode while setting up stacks is `SYSTEM`. So, make this change and run the program. When the execution reaches `main()`, check the `CPSR` register in the debug window to make sure that the mode is `SVC`.
+
+After making the change, you will notice that the debug prints no longer works. We will fix that later on.
+
+#### Integrating ThreadX
+ThreadX supports a lot of processor architectures, as you can confirm by checking the "ports" folder. We want only Cortex-R5 so, delete the rest of the ports. In Cortex-R5, we will see support for multiple compilers. We will retain just GNU and delete the rest. Import the ThreadX source directory in the CCS project by creating a symbolic link. Build the project. You will see that it does not build.
+
+#### Testing ThreadX with Two Threads
+
+#### Taking Care of the Interrupts
+
+#### Setting up SysTick Timer
+
 [lpam243x_url]: https://www.ti.com/tool/LP-AM243
 [lpam243x_mcu_sdk_url]: https://www.ti.com/tool/MCU-PLUS-SDK-AM243X
 [threadx_url]: https://github.com/azure-rtos/threadx
