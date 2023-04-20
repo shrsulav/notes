@@ -35,11 +35,21 @@ The MCU SDK provides a lot of examples for no-RTOS and FreeRTOS bases. If we che
 After making the change, you will notice that the debug prints no longer works. We will fix that later on.
 
 #### Integrating ThreadX
-ThreadX supports a lot of processor architectures, as you can confirm by checking the "ports" folder. We want only Cortex-R5 so, delete the rest of the ports. In Cortex-R5, we will see support for multiple compilers. We will retain just GNU and delete the rest. Import the ThreadX source directory in the CCS project by creating a symbolic link. Build the project. You will see that it does not build.
+ThreadX supports a lot of processor architectures, as you can confirm by checking the "ports" folder. We want only Cortex-R5 so, delete the rest of the ports. In Cortex-R5, we will see support for multiple compilers. We will retain just GNU and delete the rest. Import the ThreadX source directory in the CCS project by creating a symbolic link. Add the `tx_kernel_enter()` function after the point the drivers are setup. Define `tx_application_define` function. At this point, the function can be empty. Build the project. You will see that it does not build. The error log shows that it is not able to find a few symbols. Those symbols come from the `_tx_initialize_low_level.S`.
+
+The low level initialization in ThreadX, sets up the stacks for different processor modes and initializes a few variables. We do not need to set up stacks for different processor modes as we have already set them up before `main()`. So, we can safely comment out the code to setup the stacks. Next, we need to intialize a few variables - `_tx_thread_system_stack_ptr` and `_tx_initialize_unused_memory`. The `_tx_thread_system_stack_ptr` variable needs to point to the top of the `SVC` mode stack. The top of the `SVC` mode stack is pointed to by the variable `__SVC_STACK_END` defined in the linker script. The `_tx_initialize_unused_memory` variable needs to point to the highest RAM address which can be used to setup stacks for ThreadX threads and other ThreadX objects like queues, byte pools, etc. In our case, the highest RAM address which has can be used for ThreadX constructs is the one pointed to by `__UNDEFINED_STACK_END` defined in the linker script.
+
+After making these changes, build the project and make sure that it builds fine.
 
 #### Testing ThreadX with Two Threads
+To test if the ThreadX kernel works, define two threads which do nothing but increment a variable. Since the UART print is not working, we cannot print anyting onto the console yet. Synchronize the threads in such a way that the threads wait for a semaphore (a different semaphore for each thread), and once the variable is incremented, releases semaphore for the other thread, so that the other thread can run. Build the program and make sure that the threads are running, by putting break points on the two threads. The threads should increment the variables alternatively.
 
 #### Taking Care of the Interrupts
+Till now we have not handled interrupts. We have not setup SysTick timer interrupt for the kernel and UART print is not working.
+
+Interrupt is a type of exception in Cortex-R5. The interrupt exception handler can be found in the `_vectors` construct. `_vectors` is defined in the file `HwiP_armv7r_vectors_nortos_asm.S`. The interrupt handler is defined to be `HwiP_irq_handler`. The `HwiP_irq_handler` handler, saves the context of execution before actually handling the interrupt, then handles the interrupt in the `HwiP_irq_handler_c` function, and then restores the context after handling the interrupt. ThreadX has its own interrupt handler - `__tx_irq_handler`. So, we need to change the interrupt handler from `HwiP_irq_handler` to `__tx_irq_handler`. This change needs to be done `HwiP_armv7r_vim.c` file too.
+
+The `__tx_irq_handler` handler is written to run `_tx_timer_interrupt` on every interrupt exception instead of handling the actual interrupt. To fix that, we need to branch to `HwiP_irq_handler_c` instead of `_tx_timer_interrupt`.
 
 #### Setting up SysTick Timer
 
