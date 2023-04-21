@@ -44,6 +44,11 @@ After making these changes, build the project and make sure that it builds fine.
 #### Testing ThreadX with Two Threads
 To test if the ThreadX kernel works, define two threads which do nothing but increment a variable. Since the UART print is not working, we cannot print anyting onto the console yet. Synchronize the threads in such a way that the threads wait for a semaphore (a different semaphore for each thread), and once the variable is incremented, releases semaphore for the other thread, so that the other thread can run. Build the program and make sure that the threads are running, by putting break points on the two threads. The threads should increment the variables alternatively.
 
+#### Getting Stuck at `tx_thread_shell_entry`
+The testing with two threads should have worked. But it didn't. The execution was leading to an abort exception handler. On stepping through the code with the debugger, I found that the last execution that happens before it goes to abort handler is `tx_thread_shell_entry`. In `tx_thread_shell_entry`, the ThreadX kernel is already initialized and it determines the thread to be executed and tries to go to the thread entry point. However, there's some issue in going to the thread entry point. On stepping through the assembly code, I found that the assembly code does not have any effect on the registers. The assembly code as `movw` and `movt` instructions to load to register `R0`. However, I saw no change in the register. Turns out that the culprit was the wrong ARM/Thumb mode of the processor. I found that this issue was discussed in Microsoft Forum for Azure RTOS, in [this][arm_thumb_issue] post. Once the execution reaches `tx_thread_shell_entry`, I checked the CPSR register and manually changed the mode from Thumb to ARM from the debug window. On doing that, the execution proceeds as excepted and we reach the entry point of the first thread. To fix this issue, I opened project settings and changed the mode from Thumb to ARM in compiler flag.
+
+Now with this change, the two threads execute as expected.
+
 #### Taking Care of the Interrupts
 Till now we have not handled interrupts. We have not setup SysTick timer interrupt for the kernel and UART print is not working.
 
@@ -71,3 +76,4 @@ To ascertain that the function is getting called from an ISR, it checks the CPSR
 [putty_url]: https://www.putty.org/
 [git_install_guide]: https://github.com/git-guides/install-git
 [mcu_getting_started_guide]: https://software-dl.ti.com/mcu-plus-sdk/esd/AM243X/08_04_00_17/exports/docs/api_guide_am243x/index.html
+[arm_thumb_issue]: https://learn.microsoft.com/en-us/answers/questions/752853/instruction-mode-of-the-threadx-kernel-on-r5
