@@ -49,9 +49,20 @@ Till now we have not handled interrupts. We have not setup SysTick timer interru
 
 Interrupt is a type of exception in Cortex-R5. The interrupt exception handler can be found in the `_vectors` construct. `_vectors` is defined in the file `HwiP_armv7r_vectors_nortos_asm.S`. The interrupt handler is defined to be `HwiP_irq_handler`. The `HwiP_irq_handler` handler, saves the context of execution before actually handling the interrupt, then handles the interrupt in the `HwiP_irq_handler_c` function, and then restores the context after handling the interrupt. ThreadX has its own interrupt handler - `__tx_irq_handler`. So, we need to change the interrupt handler from `HwiP_irq_handler` to `__tx_irq_handler`. This change needs to be done `HwiP_armv7r_vim.c` file too.
 
-The `__tx_irq_handler` handler is written to run `_tx_timer_interrupt` on every interrupt exception instead of handling the actual interrupt. To fix that, we need to branch to `HwiP_irq_handler_c` instead of `_tx_timer_interrupt`.
+The `__tx_irq_handler` handler is written to run `_tx_timer_interrupt` on every interrupt exception instead of handling the actual interrupt. To fix that, we need to branch to `HwiP_irq_handler_c` instead of `_tx_timer_interrupt`. `HwiP_irq_handler_c` will in turn find the source of the interrupt and execute appropriate ISR.
 
 #### Setting up SysTick Timer
+Now that the interrupt exception handler is in place, we can setup our first source of interrupt. The source of interrupt is SysTick Timer. CCStudio is setup to use SysConfig to configure such peripherals and timers. So, go to sysconfig and add a timer with 10ms period. Configure the timer to not start after setup. We will start the timer once the kernel is initialized. ThreadX has a default SysTick period of 10ms so, there's no need to change the parameter in ThreadX. However, do verify that the macro `TX_TIMER_TICKS_PER_SECOND` is set to 100. The macro is defined in `tx_api.h` file be default. The macro can be overridden in file `tx_user.h`. So, make sure that the macro `TX_TIMER_TICKS_PER_SECOND` is defined correctly.
+
+Now that the SysTick Timer is configured, build the program and run it. First of all, make sure that the correct interrupt exception handler is getting executed. To verify that `__tx_irq_handler` is getting executed instead of `HwiP_irq_handler`, put breakpoints - one at `__tx_irq_handler` and another at `HwiP_irq_handler`. When an interrupt fires, make sure that the execution stops at the correct breakpoint.
+
+#### Suspending threads with `tx_thread_sleep`
+With SysTick Timer configured and interrupt exception handler changed appropriately, `tx_thread_sleep` function should work. The function suspends the thread for specified number of ticks in the function. Call the function in the two threads defined previously and confirm that the thread sleeps for specified number of ticks.
+
+#### Fixing UART Print
+Time has come to fix the UART print. MCU SDK provides a function `DebugP_log()`. Going inside the function with the help of debugger revealed that the function things it is getting executed or getting called from an ISR. Priting to console from an ISR is not advised and hence, the MCU SDK takes the decision to not print anything when it thinks that it is getting called from an ISR. but, why does it think that `DebugP_log` is getting called from an ISR?!
+
+To ascertain that the function is getting called from an ISR, it checks the CPSR register and checks the last 5 bits to check the mode of operation. If the mode is not `SYSTEM`, it thinks that the function is getting called from an ISR. This check might be valid for the nortos example or a FreeRTOS example provided in the MCU SDK. However, ThreadX kernel and threads are configured to execute in `SVC` mode. So, in this case, modify the function to check if the execution is in `SVC` mode or not to confirm if the execution is not called from an ISR.
 
 [lpam243x_url]: https://www.ti.com/tool/LP-AM243
 [lpam243x_mcu_sdk_url]: https://www.ti.com/tool/MCU-PLUS-SDK-AM243X
