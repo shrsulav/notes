@@ -69,6 +69,24 @@ Time has come to fix the UART print. MCU SDK provides a function `DebugP_log()`.
 
 To ascertain that the function is getting called from an ISR, it checks the CPSR register and checks the last 5 bits to check the mode of operation. If the mode is not `SYSTEM`, it thinks that the function is getting called from an ISR. This check might be valid for the nortos example or a FreeRTOS example provided in the MCU SDK. However, ThreadX kernel and threads are configured to execute in `SVC` mode. So, in this case, modify the function to check if the execution is in `SVC` mode or not to confirm if the execution is not called from an ISR.
 
+#### FreeRTOS Compatibility Layer
+For my project, the application was originally developed for FreeRTOS. So, to avoid rewriting the application, I will add the FreeRTOS Compatibility Layer to my project. So, first of all, we will add the source files for the layer available in `utility/rtos_compatibility_layers/FreeRTOS/` directory from ThreadX. Then, we will add include paths to the project so that the necessary header files can be found. The documentation to enable the FreeRTOS Compatibility Layer can be found [here][fr_compatibility_url]. After making the changes provided in the document and making sure it builds, we will create a FreeRTOS task in addition to the two ThreadX threads that we already have.
+
+```c
+// thread entry for FreeRTOS task
+void fr_task_entry(void)
+{
+    UINT thread_counter = 0;
+
+    while(1)
+    {
+        thread_counter++;
+        DebugP_log("Task FreeRTOS counter: %d\r\n", thread_counter);
+        vTaskDelay(200); // corresponding to 2 seconds
+    }
+}
+```
+
 [lpam243x_url]: https://www.ti.com/tool/LP-AM243
 [lpam243x_mcu_sdk_url]: https://www.ti.com/tool/MCU-PLUS-SDK-AM243X
 [threadx_url]: https://github.com/azure-rtos/threadx
@@ -77,3 +95,4 @@ To ascertain that the function is getting called from an ISR, it checks the CPSR
 [git_install_guide]: https://github.com/git-guides/install-git
 [mcu_getting_started_guide]: https://software-dl.ti.com/mcu-plus-sdk/esd/AM243X/08_04_00_17/exports/docs/api_guide_am243x/index.html
 [arm_thumb_issue]: https://learn.microsoft.com/en-us/answers/questions/752853/instruction-mode-of-the-threadx-kernel-on-r5
+[fr_compatibility_url]: https://github.com/azure-rtos/threadx/tree/master/utility/rtos_compatibility_layers/FreeRTOS
