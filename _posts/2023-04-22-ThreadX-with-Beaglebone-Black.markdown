@@ -14,6 +14,32 @@ In this post, I will write about how I built ThreadX (Azure RTOS) for Beaglebone
 * Git: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;[https://github.com/git-guides/install-git][git_install_guide]
 
 ### Steps
+#### Setting up Beaglebone Black Serial Console
+The steps to setup serial console on the Beaglebone Black can be found in the references below:
+* Setting up Serial Console: [https://dave.cheney.net/2013/09/22/two-point-five-ways-to-access-the-serial-console-on-your-beaglebone-black][serial_console_bbb_1]
+* Setting up Serial Console: [https://elinux.org/Beagleboard:BeagleBone_Black_Serial][serial_console_bbb_2]
+
+#### Setting up U-Boot on Beaglebone Black
+First of all, I tried to setup U-Boot following the steps provided in the following article.
+* Setting up U-Boot for BBB: [https://longervision.github.io/2018/01/10/SBCs/ARM/beaglebone-black-uboot-kernel/][uboot_bbb]
+
+But, there was no `saveenv` command to save the U-Boot command. So, setup U-Boot in the following way.
+
+Flash Debian console image onto microSD card. The image I have used is ["AM3358 Debian 10.3 2020-04-06 1GB SD console"][bbb_image_url]. Login to the Debian terminal. Create the file uEnv.txt at root location.
+
+```bash
+$ sudo nano /uEnv.txt
+```
+
+Paste the following contents onto the file and save the file.
+```
+uenvcmd=setenv ethact usb_ether;setenv ipaddr 192.168.1.2;setenv serverip 192.168.1.3; setenv loadaddr 0x80000000;setenv tftproot /;setenv bootfile firmware.bin;tftp ${loadaddr} ${bootfile};echo *** Booting to BareMetal ***;go ${loadaddr};
+```
+
+This command assumes that the Beaglebone Black board is connected to the host computer via an Ethernet cable. The IP address of the host computer is set to be 192.168.1.3. A TFTP server is configured to serve the file `firmware.bin` which is the application which we want to run on Beaglebone Black board.
+
+Reboot the board. Now, U-Boot should fetch firmware.bin file from the TFTP server and execute the application.
+
 #### Setting up the Development Environment
 This guide [here][getting_started_demo] provides a demo on how to get started with Beaglebone Black development using [AM335x Starterware Kit][starter_kit]. So, go ahead and setup the tools necessary to get started with the development. The guide shows a LED blinking application. Instead of the LED blinking application, let's setup an application which prints to UART console.
 
@@ -34,6 +60,11 @@ To test if the ThreadX kernel works, define two threads which do nothing but inc
 
 #### Suspending threads with `tx_thread_sleep`
 
+### References
+
+* [Bare Metal on the BeagleBone (Black and Green)][ref_1]
+* [Running a Baremetal Beaglebone Black (Part 2)][ref_2]
+
 [starter_kit]: https://www.ti.com/tool/PROCESSOR-SDK-AM335X
 [bbb_url]: https://beagleboard.org/black
 [threadx_url]: https://github.com/azure-rtos/threadx
@@ -41,3 +72,9 @@ To test if the ThreadX kernel works, define two threads which do nothing but inc
 [putty_url]: https://www.putty.org/
 [git_install_guide]: https://github.com/git-guides/install-git
 [getting_started_demo]: https://www.youtube.com/watch?v=iOQisBaDANA
+[serial_console_bbb_1]: https://dave.cheney.net/2013/09/22/two-point-five-ways-to-access-the-serial-console-on-your-beaglebone-black
+[serial_console_bbb_2]: https://elinux.org/Beagleboard:BeagleBone_Black_Serial
+[uboot_bbb]: https://longervision.github.io/2018/01/10/SBCs/ARM/beaglebone-black-uboot-kernel/
+[bbb_image_url]: https://beagleboard.org/latest-images
+[ref_1]: https://opencoursehub.cs.sfu.ca/bfraser/grav-cms/ensc351/guides/files/BareMetalGuide.pdf
+[ref_2]: https://twosixtech.com/running-a-baremetal-beaglebone-black-part-2/
