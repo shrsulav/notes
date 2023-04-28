@@ -8,6 +8,7 @@ In this post, I will write about how I built ThreadX (Azure RTOS) for Beaglebone
 
 * Beaglebone Black: &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;[https://beagleboard.org/black][bbb_url]
 * Processor SDK for AM335x: [https://www.ti.com/tool/PROCESSOR-SDK-AM335X][starter_kit]
+* TI Starterware AM335x: &nbsp; &nbsp; &nbsp; &nbsp;[https://www.ti.com/tool/download/STARTERWARE-AM335X/02.00.01.01][ti_starterware_url]
 * ThreadX: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[https://github.com/azure-rtos/threadx][threadx_url]
 * Code Composer Studio: &nbsp; &nbsp; &nbsp; [https://www.ti.com/tool/CCSTUDIO][ccstudio_url]
 * PuTTY Serial Terminal:&nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; [https://www.putty.org/][putty_url]
@@ -40,16 +41,75 @@ This command assumes that the Beaglebone Black board is connected to the host co
 
 Reboot the board. Now, U-Boot should fetch firmware.bin file from the TFTP server and execute the application.
 
-#### Setting up the Development Environment
-This guide [here][getting_started_demo] provides a demo on how to get started with Beaglebone Black development using [AM335x Starterware Kit][starter_kit]. So, go ahead and setup the tools necessary to get started with the development. The guide shows a LED blinking application. Instead of the LED blinking application, let's setup an application which prints to UART console.
-
 #### Setting up Git Repository for the Project
+Our git repository will consist of two directories - build and src. We will use build folder as the workspace for CCStudio. We will use src folder to have TI Starterware source files and ThreadX source files.
 
-#### Setting up CCS project for development
+#### Setting up the Development Environment
+Install TI Starterware Kit for AM335x (available [here] [ti_starterware_url]). Apply Beaglebone Black support patch. Download ThreadX version 6.2.1 (available [here][threadx_url]). This guide [here][getting_started_demo] provides a demo on how to get started with Beaglebone Black development using [AM335x Starterware Kit][starter_kit]. So, go ahead and setup the tools necessary to get started with the development. The guide shows a LED blinking application. Instead of the LED blinking application, let's setup an application which uses lwIP network stack.
 
-#### Mode of Operation for ThreadX
+Import the CCS projects `drivers`, `platform`, `system`, `utils` and `enetLwip`. The projects are configured to use TI compilers. Change it to GNU Compiler.
+
+Define the following symbols for all the projects.
+```
+am335x
+beaglebone
+SUPPORT_UNALIGNED
+gcc
+MMCSD
+UARTCONSOLE
+```
+
+Add the include paths for all the projects.
+```
+${TI_STARTERWARE_HOME}\include
+${TI_STARTERWARE_HOME}\include\hw
+${TI_STARTERWARE_HOME}\include\armv7a
+${TI_STARTERWARE_HOME}\include\armv7a\am335x
+${TI_STARTERWARE_HOME}\usblib\include
+```
+
+For `enetLwip` project, add the following include paths as well
+```
+${LWIP_HOME}
+${LWIP_HOME}\src\include
+${LWIP_HOME}\src\include\ipv4
+${LWIP_HOME}\src\include\lwip
+${LWIP_HOME}\apps\httpserver_raw
+${LWIP_HOME}\ports\cpsw\include
+${TI_STARTERWARE_HOME}\examples\beaglebone\enet_lwip
+```
+
+On building `system` library, the build will fail because the project is configured to use TI Compilers. Since we are using GNU Compiler, replace the files which are failing to build with the files in "${TI_STARTERWARE_HOME}\system_config\armv7a\cgt" directory from "${TI_STARTERWARE_HOME}\system_config\armv7a\gcc" directory.
+
+The files are:
+
+```
+exceptionhandler.asm -> exceptionhandler.S
+cp15.asm -> cp15.S
+init.asm  -> init.S
+cpu.c -> cpu.c
+```
+
+For enetLwip project, delete the `enetLwip.cmd` file which is replaced by AM335x.lds file. The build process will fail to find the following symbols:
+```
+_bss_start
+_bss_end
+_stack
+```
+So, define them in AM335x.lds linker script.
+
+Also delete the startup file from enetLwip project. Define `-specs=nosys.specs`. Otherwise, the compiler will complain saying -
+````undefined reference to `_exit````.
+
+The project will build `enetLwip.out` file. To build `enetLwip.bin` file, go to `Properties->Build->GNU Objcopy Utility` and select the option to enable the utility. Also, go to `Properties->Build->GNU Objcopy Utility->General Options`. Change to `--output-target` to binary.
+
+As a post-build step to the project, add a command to copy the *.bin file to tftp server directory.
+
+Turn on the board and make sure that the firmware loads and executes.
 
 #### Integrating ThreadX
+
+#### Mode of Operation for ThreadX
 
 #### Testing ThreadX with Two Threads
 To test if the ThreadX kernel works, define two threads which do nothing but increment a variable. Since the UART print is not working, we cannot print anyting onto the console yet. Synchronize the threads in such a way that the threads wait for a semaphore (a different semaphore for each thread), and once the variable is incremented, releases semaphore for the other thread, so that the other thread can run. Build the program and make sure that the threads are running, by putting break points on the two threads. The threads should increment the variables alternatively.
@@ -78,3 +138,5 @@ To test if the ThreadX kernel works, define two threads which do nothing but inc
 [bbb_image_url]: https://beagleboard.org/latest-images
 [ref_1]: https://opencoursehub.cs.sfu.ca/bfraser/grav-cms/ensc351/guides/files/BareMetalGuide.pdf
 [ref_2]: https://twosixtech.com/running-a-baremetal-beaglebone-black-part-2/
+[ti_starterware_url]: https://www.ti.com/tool/download/STARTERWARE-AM335X/02.00.01.01
+
