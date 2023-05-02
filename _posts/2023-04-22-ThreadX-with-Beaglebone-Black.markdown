@@ -14,13 +14,12 @@ In this post, I will write about how I built ThreadX (Azure RTOS) for Beaglebone
 * PuTTY Serial Terminal:&nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; [https://www.putty.org/][putty_url]
 * Git: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;[https://github.com/git-guides/install-git][git_install_guide]
 
-### Steps
-#### Setting up Beaglebone Black Serial Console
+### Setting up Beaglebone Black Serial Console
 The steps to setup serial console on the Beaglebone Black can be found in the references below:
 * Setting up Serial Console: [https://dave.cheney.net/2013/09/22/two-point-five-ways-to-access-the-serial-console-on-your-beaglebone-black][serial_console_bbb_1]
 * Setting up Serial Console: [https://elinux.org/Beagleboard:BeagleBone_Black_Serial][serial_console_bbb_2]
 
-#### Setting up U-Boot on Beaglebone Black
+### Setting up U-Boot on Beaglebone Black
 First of all, I tried to setup U-Boot following the steps provided in the following article.
 * Setting up U-Boot for BBB: [https://longervision.github.io/2018/01/10/SBCs/ARM/beaglebone-black-uboot-kernel/][uboot_bbb]
 
@@ -41,10 +40,10 @@ This command assumes that the Beaglebone Black board is connected to the host co
 
 Reboot the board. Now, U-Boot should fetch firmware.bin file from the TFTP server and execute the application.
 
-#### Setting up Git Repository for the Project
+### Setting up Git Repository for the Project
 Our git repository will consist of two directories - build and src. We will use build folder as the workspace for CCStudio. We will use src folder to have TI Starterware source files and ThreadX source files.
 
-#### Setting up the Development Environment
+### Setting up the Development Environment
 Install TI Starterware Kit for AM335x (available [here] [ti_starterware_url]). Apply Beaglebone Black support patch. Download ThreadX version 6.2.1 (available [here][threadx_url]). This guide [here][getting_started_demo] provides a demo on how to get started with Beaglebone Black development using [AM335x Starterware Kit][starter_kit]. So, go ahead and setup the tools necessary to get started with the development. The guide shows a LED blinking application. Instead of the LED blinking application, let's setup an application which uses lwIP network stack.
 
 Import the CCS projects `drivers`, `platform`, `system`, `utils` and `enetLwip`. The projects are configured to use TI compilers. Change it to GNU Compiler.
@@ -107,7 +106,7 @@ As a post-build step to the project, add a command to copy the *.bin file to tft
 
 Turn on the board and make sure that the firmware loads and executes. At this point, the the board should request for IP address from a DHCP server.
 
-#### Integrating ThreadX
+### Integrating ThreadX
 Create a library project for ThreadX. Modify the enetLwip project to link with ThreadX library. Define `tx_application_define` function to create two threads and two semaphores.
 
 ```c
@@ -214,16 +213,16 @@ At this point, the build process should complain about undefined references to `
 
 Build all the libraries and the enetLwip project. Restart the board. Make sure that the execution is as expected. Now, lwIP should not start. Rather, the execution should go to the two ThreadX threads.
 
-#### Mode of Operation for ThreadX
+### Mode of Operation for ThreadX
 ThreadX runs both the kernel and application threads in SVC mode.
 
-#### Taking Care of the Interrupts
+### Taking Care of the Interrupts
 
-#### Setting up SysTick Timer
+### Setting up SysTick Timer
 
-#### Suspending threads with `tx_thread_sleep`
+### Suspending threads with `tx_thread_sleep`
 
-### References
+## References
 
 * [Bare Metal on the BeagleBone (Black and Green)][ref_1]
 * [Running a Baremetal Beaglebone Black (Part 2)][ref_2]
