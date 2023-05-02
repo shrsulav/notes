@@ -217,10 +217,108 @@ Build all the libraries and the enetLwip project. Restart the board. Make sure t
 ThreadX runs both the kernel and application threads in SVC mode.
 
 ### Taking Care of the Interrupts
+Modify the vector table in startup.c file such that the interrupt exception is handled by `__tx_irq_handler` instead of the `IRQHandler` that is defined by the Starterware source code. The interrupt handling in `IRQHandler` consists of three parts - context save, interrupt handling  and context restore. `__tx_irq_handler` already consists of code to save and restore the context. So, take the actual interrupt handling code from `IRQHandler` and use it in `__tx_irq_handler`.
 
+```
+__tx_irq_handler:
+
+    /* Jump to context save to save system context.  */
+    B       _tx_thread_context_save
+__tx_irq_processing_return:
+//
+    /* At this point execution is still in the IRQ mode.  The CPSR, point of
+       interrupt, and all C scratch registers are available for use.  In
+       addition, IRQ interrupts may be re-enabled - with certain restrictions -
+       if nested IRQ interrupts are desired.  Interrupts may be re-enabled over
+       small code sequences where lr is saved before enabling interrupts and
+       restored after interrupts are again disabled.  */
+
+    LDR      r0, =ADDR_THRESHOLD      @ Get the IRQ Threshold
+    LDR      r1, [r0, #0]
+    STMFD    r13!, {r1}               @ Save the threshold value
+
+    LDR      r2, =ADDR_IRQ_PRIORITY   @ Get the active IRQ priority
+    LDR      r3, [r2, #0]
+    STR      r3, [r0, #0]             @ Set the priority as threshold
+
+    LDR      r1, =ADDR_SIR_IRQ        @ Get the Active IRQ
+    LDR      r2, [r1]
+    AND      r2, r2, #MASK_ACTIVE_IRQ @ Mask the Active IRQ number
+
+    MOV      r0, #NEWIRQAGR           @ To enable new IRQ Generation
+    LDR      r1, =ADDR_CONTROL
+
+    CMP      r3, #0                   @ Check if non-maskable priority 0
+    STRNE    r0, [r1]                 @ if > 0 priority, acknowledge INTC
+    DSB                               @ Make sure acknowledgement is completed
+
+    @
+    @ Enable IRQ and switch to system mode. But IRQ shall be enabled
+    @ only if priority level is > 0. Note that priority 0 is non maskable.
+    @ Interrupt Service Routines will execute in System Mode.
+    @
+    MRS      r14, cpsr                @ Read cpsr
+    ORR      r14, r14, #MODE_SYS
+    BICNE    r14, r14, #I_BIT         @ Enable IRQ if priority > 0
+    MSR      cpsr, r14
+
+
+    STMFD    r13!, {r14}              @ Save lr_usr
+
+    /* Interrupt nesting is allowed after calling _tx_thread_irq_nesting_start
+       from IRQ mode with interrupts disabled.  This routine switches to the
+       system mode and returns with IRQ interrupts enabled.
+
+       NOTE:  It is very important to ensure all IRQ interrupts are cleared
+       prior to enabling nested IRQ interrupts.  */
+#ifdef TX_ENABLE_IRQ_NESTING
+    BL      _tx_thread_irq_nesting_start
+#endif
+
+    /* For debug purpose, execute the timer interrupt processing here.  In
+       a real system, some kind of status indication would have to be checked
+       before the timer interrupt handler could be called.  */
+
+    @ BL     _tx_timer_interrupt                  // Timer interrupt handler
+
+    LDR      r0, =fnRAMVectors        @ Load the base of the vector table
+    ADD      r14, pc, #0              @ Save return address in LR
+    LDR      pc, [r0, r2, lsl #2]     @ Jump to the ISR
+
+    LDMFD    r13!, {r14}              @ Restore lr_usr
+
+
+    /* If interrupt nesting was started earlier, the end of interrupt nesting
+       service must be called before returning to _tx_thread_context_restore.
+       This routine returns in processing in IRQ mode with interrupts disabled.  */
+#ifdef TX_ENABLE_IRQ_NESTING
+    BL      _tx_thread_irq_nesting_end
+#endif
+
+    @
+    @ Disable IRQ and change back to IRQ mode
+    @
+    CPSID    i, #MODE_IRQ
+    LDR      r0, =ADDR_THRESHOLD      @ Get the IRQ Threshold
+    LDR      r1, [r0, #0]
+    CMP      r1, #0                   @ If priority 0
+    MOVEQ    r2, #NEWIRQAGR           @ Enable new IRQ Generation
+    LDREQ    r1, =ADDR_CONTROL
+    STREQ    r2, [r1]
+    LDMFD    r13!, {r1}
+    STR      r1, [r0, #0]             @ Restore the threshold value
+
+    /* Jump to context restore to restore system context.  */
+    B       _tx_thread_context_restore
+
+```
 ### Setting up SysTick Timer
+AM335x has 7 timers. I am using DMTimer 4 to configure SysTick of 10ms. The platform library project consists of skeleton functions to configure, enable and disable the timer to be used as SysTick. The skeleton is available in timertick.c file. I am going to use the skeleton from platform library project as SysTick configurator. Also, remember to enable the interrupts before trying to use SysTick.
+
+To learn how to use DMTimer, refer to dmtimer example that comes with the TI Starterware. Also, refer to the user guide that is available in the docs folder of TI Starterware.
 
 ### Suspending threads with `tx_thread_sleep`
+Now, when we add `tx_thread_sleep(200)` into the two threads that we have created previously, the threads should sleep for 2 seconds.
 
 ## References
 
