@@ -215,9 +215,7 @@ At this point, the build process should complain about undefined references to `
 Build all the libraries and the enetLwip project. Restart the board. Make sure that the execution is as expected. Now, lwIP should not start. Rather, the execution should go to the two ThreadX threads.
 
 #### Mode of Operation for ThreadX
-
-#### Testing ThreadX with Two Threads
-To test if the ThreadX kernel works, define two threads which do nothing but increment a variable. Since the UART print is not working, we cannot print anyting onto the console yet. Synchronize the threads in such a way that the threads wait for a semaphore (a different semaphore for each thread), and once the variable is incremented, releases semaphore for the other thread, so that the other thread can run. Build the program and make sure that the threads are running, by putting break points on the two threads. The threads should increment the variables alternatively.
+ThreadX runs both the kernel and application threads in SVC mode.
 
 #### Taking Care of the Interrupts
 
