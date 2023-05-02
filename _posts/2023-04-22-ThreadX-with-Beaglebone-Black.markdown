@@ -227,6 +227,9 @@ ThreadX runs both the kernel and application threads in SVC mode.
 
 * [Bare Metal on the BeagleBone (Black and Green)][ref_1]
 * [Running a Baremetal Beaglebone Black (Part 2)][ref_2]
+* [AM335x Technical Reference Manual][ref_3]
+* [Cortex-A8 Technical Reference Manual][ref_4]
+* [ARM Cortex-A Series Programmers's Guide][ref_5]
 
 [starter_kit]: https://www.ti.com/tool/PROCESSOR-SDK-AM335X
 [bbb_url]: https://beagleboard.org/black
@@ -241,5 +244,8 @@ ThreadX runs both the kernel and application threads in SVC mode.
 [bbb_image_url]: https://beagleboard.org/latest-images
 [ref_1]: https://opencoursehub.cs.sfu.ca/bfraser/grav-cms/ensc351/guides/files/BareMetalGuide.pdf
 [ref_2]: https://twosixtech.com/running-a-baremetal-beaglebone-black-part-2/
+[ref_3]: https://www.ti.com/lit/ug/spruh73q/spruh73q.pdf
+[ref_4]: https://developer.arm.com/documentation/ddi0344/latest/
+[ref_5]: https://developer.arm.com/documentation/den0013/latest/
 [ti_starterware_url]: https://www.ti.com/tool/download/STARTERWARE-AM335X/02.00.01.01
 
