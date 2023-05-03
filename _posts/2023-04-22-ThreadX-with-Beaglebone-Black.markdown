@@ -320,6 +320,90 @@ To learn how to use DMTimer, refer to dmtimer example that comes with the TI Sta
 ### Suspending threads with `tx_thread_sleep`
 Now, when we add `tx_thread_sleep(200)` into the two threads that we have created previously, the threads should sleep for 2 seconds.
 
+### Starting lwIP from ThreadX thread
+The original demo came with a http server using lwIP TCP/IP stack. I had commented out http server and lwIP start code in order to simplify the ThreadX integration process. Now that ThreadX kernel is working, we can start lwIP and http server. Do so from the ThreadX thread.
+
+```c
+void start_lwip(void)
+{
+    unsigned int ipAddr;
+    unsigned int initFlg = 1;
+    LWIP_IF lwipIfPort1, lwipIfPort2;
+
+    CPSWIntrSetup();
+
+    /* Chip configuration RGMII selection */
+    EVMPortMIIModeSelect();
+
+    /* Get the MAC address */
+    EVMMACAddrGet(0, lwipIfPort1.macArray);
+    EVMMACAddrGet(1, lwipIfPort2.macArray);
+
+    ConsoleUtilsPrintf("\n\rStarterWare Ethernet Application. Access the"
+                 " embedded web page using http://<ip address assigned>/index.html"
+                 " via a web browser. \n\r\n\r");
+
+    ConsoleUtilsPrintf("Acquiring IP Address for Port 1... \n\r" );
+
+    #if STATIC_IP_ADDRESS_PORT1
+
+        lwipIfPort1.instNum = 0;
+        lwipIfPort1.slvPortNum = 1;
+        lwipIfPort1.ipAddr = STATIC_IP_ADDRESS_PORT1;
+        lwipIfPort1.netMask = 0;
+        lwipIfPort1.gwAddr = 0;
+        lwipIfPort1.ipMode = IPADDR_USE_STATIC;
+
+        ipAddr = lwIPInit(&lwipIfPort1);
+
+    #else
+
+        lwipIfPort1.instNum = 0;
+        lwipIfPort1.slvPortNum = 1;
+        lwipIfPort1.ipAddr = 0;
+        lwipIfPort1.netMask = 0;
+        lwipIfPort1.gwAddr = 0;
+        lwipIfPort1.ipMode = IPADDR_USE_DHCP;
+
+        ipAddr = lwIPInit(&lwipIfPort1);
+
+     #endif
+        if(ipAddr)
+        {
+            ConsoleUtilsPrintf("\n\r\n\rPort 1 IP Address Assigned: ");
+            IpAddrDisplay(ipAddr);
+        }
+        else
+        {
+            ConsoleUtilsPrintf("\n\r\n\rPort 1 IP Address Acquisition Failed.");
+        }
+
+        /* Initialize the sample httpd server. */
+        httpd_init();
+
+        cpswConfig.phy_param = &cpswPhyParam;
+}
+
+void network_thread_entry(void)
+{
+    ConsoleUtilsPrintf("\n\rNetwork Thread Entry\n\r");
+
+    void start_lwip(void);
+
+    start_lwip();
+}
+
+// in tx_application_define function
+
+    /* Allocate the stack for lwip thread. */
+    tx_byte_allocate(&byte_pool_0, &pointer, 4096, TX_NO_WAIT);
+
+    /* Create my_thread! */
+    tx_thread_create(&lwip_thread, "lwIP Thread",
+                     network_thread_entry, 0x1234, pointer, 4096,
+                     3, 3, TX_NO_TIME_SLICE, TX_AUTO_START);
+```
+
 ## References
 
 * [Bare Metal on the BeagleBone (Black and Green)][ref_1]
