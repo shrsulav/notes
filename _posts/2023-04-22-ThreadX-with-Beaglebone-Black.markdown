@@ -1,8 +1,8 @@
 ---
 layout: post
 title:  "ThreadX with Beaglebone Black!"
-date:   2021-12-23 17:33:18 -0500
-categories: jekyll update
+date:   2023-04-22 17:33:18 -0500
+categories: am335x cortex-a8
 ---
 In this post, I will write about how I built ThreadX (Azure RTOS) for Beaglebone Black. I am using Windows 11 OS host machine to setup cross-development environment for Beaglebone Black. Here's the list of a few things that we will need to get started.
 
@@ -327,6 +327,7 @@ Now, when we add `tx_thread_sleep(200)` into the two threads that we have create
 * [AM335x Technical Reference Manual][ref_3]
 * [Cortex-A8 Technical Reference Manual][ref_4]
 * [ARM Cortex-A Series Programmers's Guide][ref_5]
+* [ThreadX User Guide][threadx_guide]
 
 [starter_kit]: https://www.ti.com/tool/PROCESSOR-SDK-AM335X
 [bbb_url]: https://beagleboard.org/black
@@ -345,4 +346,5 @@ Now, when we add `tx_thread_sleep(200)` into the two threads that we have create
 [ref_4]: https://developer.arm.com/documentation/ddi0344/latest/
 [ref_5]: https://developer.arm.com/documentation/den0013/latest/
 [ti_starterware_url]: https://www.ti.com/tool/download/STARTERWARE-AM335X/02.00.01.01
+[threadx_guide]: https://learn.microsoft.com/en-us/azure/rtos/threadx/about-this-guide
 
