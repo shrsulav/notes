@@ -21,6 +21,7 @@ baseurl: "/notes" # the subpath of your site, e.g. /blog
 url: "https://shrsulav.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: shrsulav
 github_username: shrsulav
+google_analytics: G-9921CDCS1Z
 
 # Build settings
 markdown: kramdown
