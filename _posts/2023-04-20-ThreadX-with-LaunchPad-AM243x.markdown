@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "ThreadX with LaunchPad AM243x!"
-date:   2022-04-20 17:33:18 -0500
+date:   2023-04-20 17:33:18 -0500
 categories: am243x cortex-r5
 ---
 In this post, I will write about how I built ThreadX (Azure RTOS) for TI LaunchPad AM243x platform. I am using Windows 11 OS host machine to setup cross-development environment for LP-AM243x. Here's the list of a few things that we will need to get started.
