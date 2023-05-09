@@ -4,7 +4,7 @@ title:  "Attitude Determination and Control Software for StudSat-2"
 date:   2017-07-01 17:33:18 -0500
 categories: stm32 cortex-m4
 ---
-StudSat-2 [[1]][ref_1] is a nano-satellite project developed under the initiative of Centre of Excellence for Space Research [[2]][ref_2]. I worked as an intern and undergraduate research student with Attitude Determination and Control Systems (ADCS) team for nearly a year. During my time with the team, I worked on writing ADCS firmware for STM32F4-Discovery board. I used FreeRTOS kernel to implement the firmware.
+StudSat-2 [[1]][ref_1] is a nano-satellite project developed under the initiative of Centre of Excellence for Space Research [[2]][ref_2]. I worked as an intern and undergraduate research student with Attitude Determination and Control Systems (ADCS) team for nearly a year. During my time with the team, I worked on writing ADCS firmware for STM32F4-Discovery board [[11]][ref_11]. I used FreeRTOS kernel to implement the firmware.
 
 ### Attitude Determination Algorithm
 
@@ -48,6 +48,7 @@ I used Keil IDE for the development using Windows 7 host system. For visualizing
 * [[8] Datasheet: Smart Digital Magnetometer HMR2300][ref_8]
 * [[9] Datasheet: Integrated Triple-Axis Digital-Output Gyroscope][ref_9]
 * [[10] IEEE Paper: Design and development of 3-axis reaction wheel for STUDSAT-2][ref_10]
+* [[11] Website: STM32F4-Discovery Board][ref_11]
 
 [ref_1]: https://en.wikipedia.org/wiki/StudSat-2
 [ref_2]: https://www.nmit.ac.in/center-for-space-research.php
@@ -59,3 +60,4 @@ I used Keil IDE for the development using Windows 7 host system. For visualizing
 [ref_8]: https://aerospace.honeywell.com/content/dam/aerobt/en/documents/learn/products/sensors/datasheet/SmartDigitalMagnetometerHMR2300_ds.pdf
 [ref_9]: https://invensense.tdk.com/products/motion-tracking/3-axis/itg-3200/
 [ref_10]: https://ieeexplore.ieee.org/document/7119181
+[ref_11]: https://www.st.com/en/evaluation-tools/stm32f4discovery.html
