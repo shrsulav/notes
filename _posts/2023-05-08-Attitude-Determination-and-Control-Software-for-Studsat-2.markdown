@@ -15,11 +15,12 @@ The attitude determination algorithm used is a magnetometer-only attitude determ
 3. Attitude Filter
 
 ![Attitude Determination Algorithm Block Diagram]({{site.url}}/notes/docs/assets/images/Picture1.jpg)
+*Image 1: Block Diagram for Attitude Determination Algorithm*
 
 The algorithm uses Kalman Filter and involves a lot of matrix multiplication. STM32F407 microcontroller based on ARM Cortex-M4 [[4]][ref_4] has a floating point unit to accelerate computations involving floating point numbers. I used CMSIS DSP library [[5]][ref_5] to optimize the matrix multiplications.
 
 ### Firmware
-As a part of the project, I interfaced Magnetometer, Gyroscope, GPS and Reaction Wheels to the STM32F4-Discovery Board.
+As a part of the project, I interfaced Magnetometer [[8]][ref_8] using USART interface, Gyroscope[[9]][ref_9] using I2C interface, GPS using USART interface and Reaction Wheels [[10]][ref_10] using PWM interface to the STM32F4-Discovery Board.
 
 The firmware is implemented using FreeRTOS [[6]][ref_6] as the kernel. The firmware consists of following tasks:
 
@@ -32,8 +33,9 @@ The firmware is implemented using FreeRTOS [[6]][ref_6] as the kernel. The firmw
 | AttDet | Determines the attitude of the satellite |
 | AttControl | Controls the attitude of the satellite  |
 
-I used Keil IDE for the development using Windows 7 host system. For visualizing the FreeRTOS objects, I used Precipio Tracelyzer [[7]].
-![Tracelyzer Snapshot]({{site.url}}/notes/docs/assets/images/Picture2.png)
+I used Keil IDE for the development using Windows 7 host system. For visualizing the FreeRTOS objects, I used Precipio Tracealyzer [[7]].
+![Tracealyzer Snapshot]({{site.url}}/notes/docs/assets/images/Picture2.png)
+*Image 2: Snapshot from Tracealyzer*
 
 
 
@@ -44,7 +46,10 @@ I used Keil IDE for the development using Windows 7 host system. For visualizing
 * [[4] ARM Cortex-M4 Processor Technical Reference Manual][ref_4]
 * [[5] CMSIS DSP Software Library][ref_5]
 * [[6] Website: FreeRTOS][ref_6]
-* [[7] Website: Precipio Tracelyzer][ref_7]
+* [[7] Website: Precipio Tracealyzer][ref_7]
+* [[8] Smart Digital Magnetometer HMR2300][ref_8]
+* [[9] Integrated Triple-Axis Digital-Output Gyroscope][ref_9]
+* [[10] Design and development of 3-axis reaction wheel for STUDSAT-2][ref_10]
 
 [ref_1]: https://en.wikipedia.org/wiki/StudSat-2
 [ref_2]: https://www.nmit.ac.in/center-for-space-research.php
@@ -53,3 +58,6 @@ I used Keil IDE for the development using Windows 7 host system. For visualizing
 [ref_5]: https://www.keil.com/pack/doc/CMSIS/DSP/html/index.html
 [ref_6]: https://www.freertos.org/
 [ref_7]: https://percepio.com/tracealyzer/
+[ref_8]: https://aerospace.honeywell.com/content/dam/aerobt/en/documents/learn/products/sensors/datasheet/SmartDigitalMagnetometerHMR2300_ds.pdf
+[ref_9]: https://invensense.tdk.com/products/motion-tracking/3-axis/itg-3200/
+[ref_10]: https://ieeexplore.ieee.org/document/7119181
