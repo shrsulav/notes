@@ -15,7 +15,7 @@ The attitude determination algorithm used is a magnetometer-only attitude determ
 3. Attitude Filter
 
 ![Attitude Determination Algorithm Block Diagram]({{site.url}}/notes/docs/assets/images/Picture1.jpg)
-*Image 1: Block Diagram for Attitude Determination Algorithm*
+*Image 1: Block Diagram for Attitude Determination Algorithm --- Notations: B<sub>b</sub> - magnetic field vector in body frame, B<sub>i</sub> - magnetic field vector in intertial frame, &omega; - angular velocity*
 
 The algorithm uses Kalman Filter and involves a lot of matrix multiplication. STM32F407 microcontroller based on ARM Cortex-M4 [[4]][ref_4] has a floating point unit to accelerate computations involving floating point numbers. I used CMSIS DSP library [[5]][ref_5] to optimize the matrix multiplications.
 
@@ -37,8 +37,6 @@ I used Keil IDE for the development using Windows 7 host system. For visualizing
 ![Tracealyzer Snapshot]({{site.url}}/notes/docs/assets/images/Picture2.png)
 *Image 2: Snapshot from Tracealyzer*
 
-
-
 ## References
 * [[1] Wikipedia Page: StudSat-2][ref_1]
 * [[2] Website: Centre of Excellence for Space Research, Bangalore, India][ref_2]
@@ -47,9 +45,9 @@ I used Keil IDE for the development using Windows 7 host system. For visualizing
 * [[5] CMSIS DSP Software Library][ref_5]
 * [[6] Website: FreeRTOS][ref_6]
 * [[7] Website: Precipio Tracealyzer][ref_7]
-* [[8] Smart Digital Magnetometer HMR2300][ref_8]
-* [[9] Integrated Triple-Axis Digital-Output Gyroscope][ref_9]
-* [[10] Design and development of 3-axis reaction wheel for STUDSAT-2][ref_10]
+* [[8] Datasheet: Smart Digital Magnetometer HMR2300][ref_8]
+* [[9] Datasheet: Integrated Triple-Axis Digital-Output Gyroscope][ref_9]
+* [[10] IEEE Paper: Design and development of 3-axis reaction wheel for STUDSAT-2][ref_10]
 
 [ref_1]: https://en.wikipedia.org/wiki/StudSat-2
 [ref_2]: https://www.nmit.ac.in/center-for-space-research.php
