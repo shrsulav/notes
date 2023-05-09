@@ -14,7 +14,7 @@ The attitude determination algorithm used is a magnetometer-only attitude determ
 2. Intertial-Frame Vector Calculation
 3. Attitude Filter
 
-![Attitude Determination Algorithm Block Diagram][{{site.url}}/notes/docs/assets/images/Picture1.jpg]
+![Attitude Determination Algorithm Block Diagram]({{site.url}}/notes/docs/assets/images/Picture1.jpg)
 
 The algorithm uses Kalman Filter and involves a lot of matrix multiplication. STM32F407 microcontroller based on ARM Cortex-M4 [[4]][ref_4] has a floating point unit to accelerate computations involving floating point numbers. I used CMSIS DSP library [[5]][ref_5] to optimize the matrix multiplications.
 
@@ -33,7 +33,7 @@ The firmware is implemented using FreeRTOS [[6]][ref_6] as the kernel. The firmw
 | AttControl | Controls the attitude of the satellite  |
 
 I used Keil IDE for the development using Windows 7 host system. For visualizing the FreeRTOS objects, I used Precipio Tracelyzer [[7]].
-![Tracelyzer Snapshot][{{site.url}}/notes/docs/assets/images/Picture2.png]
+![Tracelyzer Snapshot]({{site.url}}/notes/docs/assets/images/Picture2.png)
 
 
 
