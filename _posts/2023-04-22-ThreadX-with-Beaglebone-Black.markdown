@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "ThreadX with Beaglebone Black!"
-date:   2023-04-22 17:33:18 -0500
+date:   2023-01-22 17:33:18 -0500
 categories: am335x cortex-a8
 ---
 In this post, I will write about how I built ThreadX (Azure RTOS) for Beaglebone Black. I am using Windows 11 OS host machine to setup cross-development environment for Beaglebone Black. Here's the list of a few things that we will need to get started.
