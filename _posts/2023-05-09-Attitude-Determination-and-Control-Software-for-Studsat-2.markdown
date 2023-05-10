@@ -4,6 +4,8 @@ title:  "Attitude Determination and Control Software for StudSat-2"
 date:   2017-07-01 17:33:18 -0500
 categories: stm32 cortex-m4
 ---
+*Article Created on May 09, 2023*
+
 StudSat-2 [[1]][ref_1] is a nano-satellite project developed under the initiative of Centre of Excellence for Space Research [[2]][ref_2]. I worked as an intern and undergraduate research student with Attitude Determination and Control Systems (ADCS) team for nearly a year. During my time with the team, I worked on writing ADCS firmware for STM32F4-Discovery board [[11]][ref_11]. I used FreeRTOS kernel to implement the firmware.
 
 ### Attitude Determination Algorithm

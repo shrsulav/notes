@@ -4,6 +4,8 @@ title:  "ThreadX with SAME70 Xplained!"
 date:   2022-08-01 17:33:18 -0500
 categories: same70 cortex-m7
 ---
+*Article Created on May 08, 2023*
+
 In this post, I will write about how I built ThreadX (Azure RTOS) for SAME70 Xplained Evaulation Kit. I am using Windows 11 OS host machine to setup cross-development environment for SAME70 Xplained. Here's the list of a few things that we will need to get started.
 
 * SAME70 Xplained Kit:&nbsp;&nbsp;&nbsp;[https://www.microchip.com/en-us/development-tool/ATSAME70-XPLD][board_url]
