@@ -22,7 +22,7 @@ The algorithm uses Kalman Filter and involves a lot of matrix multiplication. ST
 ### Firmware
 As a part of the project, I interfaced Magnetometer [[8]][ref_8] using USART interface, Gyroscope[[9]][ref_9] using I2C interface, GPS using USART interface and Reaction Wheels [[10]][ref_10] using PWM interface to the STM32F4-Discovery Board.
 
-The firmware is implemented using FreeRTOS [[6]][ref_6] as the kernel. The firmware consists of following tasks:
+The firmware is implemented using FreeRTOS [[6]][ref_6] as the kernel. The firmware consists of tasks outlined in the table below:
 
 | Task Name  | Description |
 | ------------------- | ------------- |
@@ -33,7 +33,7 @@ The firmware is implemented using FreeRTOS [[6]][ref_6] as the kernel. The firmw
 | AttDet | Determines the attitude of the satellite |
 | AttControl | Controls the attitude of the satellite  |
 
-I used Keil IDE for the development using Windows 7 host system. For visualizing the FreeRTOS objects, I used Precipio Tracealyzer [[7]].
+I used Keil IDE for the development using Windows 7 host system. For visualizing the FreeRTOS objects, I used Precipio Tracealyzer [[7]][ref_7].
 ![Tracealyzer Snapshot]({{site.url}}/notes/docs/assets/images/Picture2.png)
 *Image 2: Snapshot from Tracealyzer*
 
