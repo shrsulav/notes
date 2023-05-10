@@ -85,3 +85,14 @@ Following are the articles that were useful to me while writing an application f
 [ref_4_1]: https://docs.mapbox.com/mapbox-gl-js/guides/
 [ref_4_2]: https://www.sparkfun.com/datasheets/GPS/NMEA%20Reference%20Manual-Rev2.1-Dec07.pdf
 [ref_4_3]: https://sixfab.com/product/raspberry-pi-4g-lte-modem-kit/
+
+### Creating HTML user interfaces
+The following are the articles on creating user interface using HTML-CSS and communicating with the user interface using Python and Javascript. The framework used is Eel which uses WebSockets.
+
+* [Eel: Communicating with HTML user interface using Python and JavaScript][ref_5_1]
+* [Eel: Get simple GUI for your Python][ref_5_2]
+* [Introducing WebSockets][ref_5_3]
+
+[ref_5_1]: https://github.com/python-eel/Eel
+[ref_5_2]: https://sed-paris.gitlabpages.inria.fr/developer-meetups/2019-01-22/DevMeetup-Eel-20190122.pdf
+[ref_5_3]: https://web.dev/websockets-basics/
