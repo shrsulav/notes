@@ -121,7 +121,7 @@ void tx_application_define(void *first_unused_memory)
 }
 ```
 
-Call `tx_kernel_enter()` in `main()`. Build the ThreadX library and enetLwip project.
+Call `tx_kernel_enter()` in `main()`. Build the project.
 
 At this point, the build process should complain about undefined references to `__RAM_segment_used_end__` and `_vectors` which are referenced in `tx_initialize_low_level.S` file. Define `__RAM_segment_used_end__` in the linker script which should point to the first memory address in RAM which is not used or, the address after heaps and stacks have been setup. `_vectors` should point to the vector table or exception table. In our project, the table is named `exception_table`. So, rename `_vectors` as `exception_table`. Modify the `SYSTEM_CLOCK` and `SYSTICK_CYCLES` to configure a 10ms systick.
 
