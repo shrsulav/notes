@@ -15,9 +15,16 @@ In this post, I will write about how I built ThreadX (Azure RTOS) for SAME70 Xpl
 * Git: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;[https://github.com/git-guides/install-git][git_install_guide]
 
 ### Setting up the Starting Project
-Create a new git repository in github with a README. Clone the repository in local setup. Open up Microchip Studio and import an example project. For this project, we will use lwIP project as the starting project. Go to `File->New->Atmel Start Example Project`. Set the filter for SAME70 Xplained Board. Select lwIP example project. Generate the project. Select the git repository we just created as the workspace for the project. Verify that the project works. Commit the project at this stage.
+Create a new git repository in github with a README. Clone the repository in local setup. Open up Microchip Studio and import an example project. For this project, we will use lwIP project as the starting project. Go to `File->New->Atmel Start Example Project`. Set the filter for SAME70 Xplained Board. Select lwIP example project. Generate the project. Select the git repository we just created as the workspace for the project. Verify that the project works. On running the program, you should see prints in the UART console (baudrate is configured to be 9600 bps). The program prints the statically configured IP address to the console. Try to ping the IP address of the board from the host computer. If ping is successful, the project works. Commit the project at this stage.
 
 ### Integrating ThreadX
+Clone the threadx source code with tag `v6.2.1_rel` from git repository.
+```bash
+$ git clone --depth 1 --single-branch --branch v6.2.1_rel https://github.com/azure-rtos/threadx.git
+```
+
+Remove unnecessary source files. We do need the common folder and the ports folder for the time being. In ports folder, retain only the cortex_m7 port folder for GNU toolchain. Add the include directories from threadx `common\inc` and `ports\cortex_m7_gnu\inc` and build the program. At this point
+
 Define `tx_application_define` function to create two threads and two semaphores.
 
 ```c
@@ -46,10 +53,10 @@ void my_thread_entry(ULONG thread_input)
         /* Increment thread counter. */
         thread_counter++;
 
-        ConsoleUtilsPrintf("\r\nThread 1 Count: %d", thread_counter);
-
         /* Release the semaphore. */
         status = tx_semaphore_put(&semaphore_1);
+
+        tx_thread_sleep(500); // corresponding to 5s
 
         /* Check status. */
         if (status != TX_SUCCESS) break;
@@ -73,7 +80,7 @@ void my_thread_entry_2(ULONG thread_input)
         /* Increment thread counter. */
         thread_counter++;
 
-        ConsoleUtilsPrintf("\r\nThread 2 Count: %d", thread_counter);
+        tx_thread_sleep(500); // corresponding to 5s
 
         /* Release the semaphore. */
         status = tx_semaphore_put(&semaphore_0);
@@ -116,26 +123,29 @@ void tx_application_define(void *first_unused_memory)
 
 Call `tx_kernel_enter()` in `main()`. Build the ThreadX library and enetLwip project.
 
-At this point, the build process should complain about undefined references to `_sp`, `_stack_bottom` and `_end` which are referenced in `tx_initialize_low_level.S` file. Comment out the code in the file that sets up stacks for different modes of operation for Cortex-A8. Stacks are setup early in the boot process before main is called. This resolves the issue for `_stack_bottom` as it is not being used anymore. We also do not need to get the value of `_sp`, which is the top of the allocated stack region in linker script. What we do need is to initialize the variables `_tx_thread_system_stack_ptr` and `_tx_initialize_unused_memory`.
+At this point, the build process should complain about undefined references to `__RAM_segment_used_end__` and `_vectors` which are referenced in `tx_initialize_low_level.S` file. Define `__RAM_segment_used_end__` in the linker script which should point to the first memory address in RAM which is not used or, the address after heaps and stacks have been setup. `_vectors` should point to the vector table or exception table. In our project, the table is named `exception_table`. So, rename `_vectors` as `exception_table`. Modify the `SYSTEM_CLOCK` and `SYSTICK_CYCLES` to configure a 10ms systick.
 
-`_tx_thread_system_stack_ptr` should point to the top of the SVC stack. So, make sure that the execution is in SVC mode and get the stack pointer. Then, store the stack pointer at that point to the variable `_tx_thread_system_stack_ptr`. To ensure that the execution is in SVC mode, modify the stack setup procedure in `init.S` file from `system` library. The stack setup process initializes stack for SYSTEM mode at last and SVC mode before that. With that, the `main()` executions starts with SYSTEM mode. Swap the initialization for SVC mode stack and SYSTEM mode to ensure that the `main()` execution starts with SVC mode.
+```c
+SYSTEM_CLOCK      =   300000000                 // 300MHz
+SYSTICK_CYCLES    =   ((SYSTEM_CLOCK)/100 -1)   // for 10ms systick
+```
 
-`_tx_initialize_unused_memory` should point to the highest RAM address that has been used till that point. For this we define `_end` variable in the linker script to point the address after stack has been allocated.
+`_tx_thread_system_stack_ptr` should point to the top of the stack. The stack address is the first member in the `exception_table` structure.
 
-Build all the libraries and the enetLwip project. Restart the board. Make sure that the execution is as expected. Now, lwIP should not start. Rather, the execution should go to the two ThreadX threads.
+The following code in `tx_initialize_low_level.S` initializes the vector table offset register with the address of the vector table. This step is already done in the C startup code before main is called, so this code can be removed from `tx_initialize_low_level.S`.
 
-### Mode of Operation for ThreadX
+```as
+/* Setup Vector Table Offset Register.  */
+MOV     r0, #0xE000E000                         // Build address of NVIC registers
+LDR     r1, =_vectors                           // Pickup address of vector table
+STR     r1, [r0, #0xD08]                        // Set vector table address
+```
 
-### Taking Care of the Interrupts
+The threadx source comes with the definition of SysTick_Handler. The SysTick_Handler is also defined in the `main.c` file. So, remove the definition in `main.c` file.
 
-### Setting up SysTick Timer
+Build the project. Check if the program runs as expected, i.e. the execution should alterate between the two threads that we have created. Also, check if `tx_thread_sleep` causes to sleep for correct amount of time.
 
-
-### Suspending threads with `tx_thread_sleep`
-Now, when we add `tx_thread_sleep(200)` into the two threads that we have created previously, the threads should sleep for 2 seconds.
-
-### Starting lwIP from ThreadX thread
-
+For some reason, printf function does not work after this.
 
 ## References
 
