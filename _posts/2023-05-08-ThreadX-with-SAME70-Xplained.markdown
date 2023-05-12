@@ -151,6 +151,7 @@ For some reason, printf function does not work after this.
 
 * [SAME70-Xplained User Guide][ref_1]
 * [ARM Cortex-M7 Processor Technical Reference Manual][ref_2]
+* [ Getting Started with SAM S70/E70][ref_3]
 * [ThreadX User Guide][threadx_guide]
 
 [microchip_studio]: https://www.microchip.com/en-us/tools-resources/develop/microchip-studio
@@ -161,3 +162,4 @@ For some reason, printf function does not work after this.
 [threadx_guide]: https://learn.microsoft.com/en-us/azure/rtos/threadx/about-this-guide
 [ref_1]: https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-44050-Cortex-M7-Microcontroller-SAM-E70-XPLD-Xplained_User-guide.pdf
 [ref_2]: https://developer.arm.com/documentation/ddi0489/b/
+[ref_3]: https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-42532-Getting-Started-with-SAM-S70-E70_ApplicationNote_AT12874.pdf
