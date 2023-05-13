@@ -123,7 +123,7 @@ void tx_application_define(void *first_unused_memory)
 
 Call `tx_kernel_enter()` in `main()`. Build the project.
 
-At this point, the build process should complain about undefined references to `__RAM_segment_used_end__` and `_vectors` which are referenced in `tx_initialize_low_level.S` file. Define `__RAM_segment_used_end__` in the linker script which should point to the first memory address in RAM which is not used or, the address after heaps and stacks have been setup. `_vectors` should point to the vector table or exception table. In our project, the table is named `exception_table`. So, rename `_vectors` as `exception_table`. Modify the `SYSTEM_CLOCK` and `SYSTICK_CYCLES` to configure a 10ms systick.
+At this point, the build process should complain about undefined references to `__RAM_segment_used_end__` and `_vectors` which are referenced in `tx_initialize_low_level.S` file. `__RAM_segment_used_end__` should point to the first memory address in RAM which has not been used for stacks or heaps during the startup, and is available for use by kernel. The linker script defines such pointer to be `_end`. So, use `_end` instead of `__RAM_segment_used_end__`. `_vectors` should point to the vector table or exception table. In our project, the table is named `exception_table`. So, rename `_vectors` as `exception_table`. Modify the `SYSTEM_CLOCK` and `SYSTICK_CYCLES` to configure a 10ms systick.
 
 ```c
 SYSTEM_CLOCK      =   300000000                 // 300MHz
@@ -145,7 +145,17 @@ The threadx source comes with the definition of SysTick_Handler. The SysTick_Han
 
 Build the project. Check if the program runs as expected, i.e. the execution should alterate between the two threads that we have created. Also, check if `tx_thread_sleep` causes to sleep for correct amount of time.
 
-For some reason, printf function does not work after this.
+*Note: printf function does not work after this.*
+
+### Configure User LED
+Since `printf` is not working, we will use a LED as a visual indication that the threads are working. SAME70-Xplained board has a user LED at pin PC8. Go to `Project->Reconfigure Atmel Start Project` and configure the pin PC8 to be output. Generate the project, which will add necessary driver initialization for the LED.
+
+From the threads that we have created, call the function below:
+```c
+gpio_toggle_pin_level(LED0);
+```
+
+Build the project and run the program. The LED should toggle every 5 seconds.
 
 ## References
 
