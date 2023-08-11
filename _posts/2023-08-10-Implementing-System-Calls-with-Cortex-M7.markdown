@@ -9,14 +9,14 @@ categories: cortex-m7 operating-systems
 
 In this post, I will implement system calls for a Cortex-M7 microcontroller. I am using SAME70-Xplained microcontroller board, and the Microchip Studio IDE.
 
-* PuTTY Serial Terminal:&nbsp;  &nbsp; &nbsp; &nbsp; [https://www.putty.org/][putty_url]
-* Git: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;[https://github.com/git-guides/install-git][git_install_guide]
-
 ### Introduction to System Calls
+The idea is to separate user-space from kernel-space. As a developer of the kernel, I want to allow the user to complete some actions. However, those actions require special privilege and I do not want to give the privilege to the user. So, what I will do is implement some functions (or, system calls) and allow the user to call this system calls to complete those actions. For e.g., I want to allow the user to print strings to the UART console. But, printing to UART console requires special privilege. I want to retain that special prvilege in the kernel. So, I will implement a system call ```k_print``` and allow the user to make the system call using a user-space equivalent of ```u_print```. To implement such a system call, we will use the supervisor call assembly instruction.
+
+![User-Space and Kernel-Space]({{site.url}}/notes/docs/assets/images/Picture4.png) <br />
+*Image 1: User-Space and Kernel-Space*
+
 
 ### System Calls with ARM Cortex-M7
-
-### Implementation Details
 First of all, I am going to define the system call. Here, I am going to use a print functionality as an example. The function ```k_print``` is a function in the kernel-space to print to the UART console.
 
 ```c
@@ -62,8 +62,8 @@ The ```__attribute__ (( naked ))``` makes sure that no stack is created for the 
 
 Now, I will implement the function where the supervisor call will be handled. The function should extract the immediate operand of the svc call (which in our case is 0x01). The ```svc_args``` argument points to the exception stack frame. From Image 1, we can see that the program counter in the exception stack frame is at an offset of 6 elements from the top. To extract the immediate value, we need to add an offset of -2 to the program counter value.
 
-![Exception Stack Frame without floating-point storage]({{site.url}}/notes/docs/assets/images/Picture3.png)
-*Image 1: Exception Stack Frame without Floating-Point Storage*
+![Exception Stack Frame without floating-point storage]({{site.url}}/notes/docs/assets/images/Picture3.png) <br />
+*Image 2: Exception Stack Frame without Floating-Point Storage*
 
 ```c
 void SVCall_Handler_Main(unsigned int *svc_args)
