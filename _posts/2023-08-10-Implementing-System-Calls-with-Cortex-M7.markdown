@@ -65,6 +65,8 @@ Now, I will implement the function where the supervisor call will be handled. Th
 ![Exception Stack Frame without floating-point storage]({{site.url}}/notes/docs/assets/images/Picture3.png) <br />
 *Image 2: Exception Stack Frame without Floating-Point Storage*
 
+When the function call ```u_print``` was made with the arguments ```str``` and ```str_len```, the pointer ```str``` was stored in ```R0``` and the argument ```str_len``` was stored in ```R1```. ```R0``` corresponds to ```svc_args[0]``` in the exception stack frame and ```R1``` corresponds to ```svc_args[1]``` in the stack frame. Hence, the function call to ```k_print``` is made with ```svc_args[0]``` and ```svc_args[1]``` as the arguments. The code below shows the supervisor call handler.
+
 ```c
 void SVCall_Handler_Main(unsigned int *svc_args)
 {
