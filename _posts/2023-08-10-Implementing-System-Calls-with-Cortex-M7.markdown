@@ -60,9 +60,9 @@ void __attribute__ (( naked )) SVCall_Handler(void)
 ```
 The ```__attribute__ (( naked ))``` makes sure that no stack is created for the function.
 
-Now, I will implement the function where the supervisor call will be handled. The function should extract the immediate operand of the svc call (which in our case is 0x01). The ```svc_args``` points to the exception stack frame.
+Now, I will implement the function where the supervisor call will be handled. The function should extract the immediate operand of the svc call (which in our case is 0x01). The ```svc_args``` argument points to the exception stack frame. From Image 1, we can see that the program counter in the exception stack frame is at an offset of 6 elements from the top. To extract the immediate value, we need to add an offset of -2 to the program counter value.
 
-![Exception Stack Frame without floating-point storage]({{site.url}}/notes/docs/assets/images/Picture3.jpg)
+![Exception Stack Frame without floating-point storage]({{site.url}}/notes/docs/assets/images/Picture3.png)
 *Image 1: Exception Stack Frame without Floating-Point Storage*
 
 ```c
