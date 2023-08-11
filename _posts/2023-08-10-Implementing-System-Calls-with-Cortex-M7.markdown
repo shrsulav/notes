@@ -17,7 +17,7 @@ The idea is to separate user-space from kernel-space. As a developer of the kern
 
 
 ### System Calls with ARM Cortex-M7
-The separation of user-space and kernel-space in ARM Cortex-M7 is indicated by ```nPRIV``` bit (Bit 0) in the ```CONTROL``` register. When ```nPRIV``` bit is set, the processor operates in unprivileged mode. For our purpose, we set the ```nPRIV``` bit as the first instruction in the ```main``` function.
+The separation of user-space and kernel-space in ARM Cortex-M7 is indicated by ```nPRIV``` bit (Bit 0) in the ```CONTROL``` register. When ```nPRIV``` bit is set, the processor operates in unprivileged mode. For our purpose, we set the ```nPRIV``` bit as the first instruction in the ```main``` function. The transition to kernel-space from user-space is done through ```svc``` assembly instruction. The instruction raises a supervisor call exception. Exception handlers operate in privileged mode.
 
 First of all, I am going to define the system call. Here, I am going to use a print functionality as an example. The function ```k_print``` is a function in the kernel-space to print to the UART console.
 
