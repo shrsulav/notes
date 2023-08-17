@@ -2,7 +2,7 @@
 layout: post
 title:  "Cooperative Round-Robin Task Scheduler with Cortex-M7!"
 date:   2023-08-16 17:33:18 -0500
-categories: cortex-m7
+categories: cortex-m7, round-robin, cooperative-scheduling, context-switching
 ---
 
 *Article Created on August 16, 2023*
@@ -13,7 +13,7 @@ In this post, I will implement contex switching for a Cortex-M7 microcontroller 
 ### Getting Started
 First of all, I will create a project in Microchip Studio for SAME70-Xplained board. I will use an example project which has configured the UART and LED. With this project, I can print to Serial UART and I can blink LED onboard the microcontroller. With this done, I will move on to the next phase.
 
-### Simple Task Switching
+### Context Switching
 Now that UART and LED are working, I will create a simple task switching mechanism. I create two tasks each with its own superloop. Each of the tasks toggle the LED and print a character to the UART. I will use system calls to create tasks, start the tasks and switch tasks.
 
 To implement such task switching, I create stacks for the two tasks. Each task consists of two stacks - user stack and kernel stack. The user stack is used when the task is being executed in thread mode. When the task executes a system call, kernel stack is used. I also create Task Control Block (TCB) for each of the tasks. The code snippet below shows the TCB structure.
@@ -93,6 +93,53 @@ The context switching procedure above does the following:
 Upon returning from the exception, since the LR value was set to be 0xFFFFFFFD, the processor uses PSP to pop the values from the stack ```xPSR```, ```PC```, ```R0-R3``` and ```R12```.
 
 I have implemented a cooperative round-robin scheduler. Each task calls ```task_yield```. When a task calls ```task_yield```, the scheduler finds another task available and switches the context to the next task.
+
+### Cooperating Round-Robin Scheduling
+To give up the control of the processor, a task must call ```task_yield```. The code snippet below shows how the next task is chosen i.e., round-robin scheduling.
+```c
+void k_find_next_task(void)
+{
+    int32_t t_current_tid = -1;
+    int32_t t_next_tid = -1;
+
+    if (g_current_task == NULL)
+    {
+        t_current_tid = 0;
+    }
+    else
+    {
+        t_current_tid = g_current_task->task_id;
+    }
+
+    for (int32_t task_id = (t_current_tid + 1) % NUM_TASKS_MAX; task_id < NUM_TASKS_MAX && task_id != g_current_task->task_id; task_id = (task_id + 1) % NUM_TASKS_MAX)
+    {
+        if (task_id == 0)
+        {
+            continue;
+        }
+
+        if (g_tcbs[task_id].is_free == false)
+        {
+            g_next_task = &g_tcbs[task_id];
+            t_next_tid = g_next_task->task_id;
+            break;
+        }
+    }
+
+    if(t_next_tid == -1 && g_current_task != NULL)
+    {
+        g_next_task = g_current_task;
+    }
+    // scheduler could not find the next task to run
+    // so, run the null task
+    else if (t_next_tid == -1 && g_current_task == NULL)
+    {
+        g_next_task = &g_tcbs[0];
+    }
+}
+```
+
+In this project, task id always belongs to a null task, which does nothing. If the for-loop cannot find any valid task id, the null task is chosen.
 
 ### Future Work
 The TCB can be enhanced to store more information about the task such as the access level. Information such as the maximum stack depth can also be stored in the TCB. This information will be helpful in figuring out if the allocated stack for a task is enough or not.
