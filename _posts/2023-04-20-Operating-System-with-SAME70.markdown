@@ -139,7 +139,7 @@ void k_find_next_task(void)
 }
 ```
 
-In this project, task id always belongs to a null task, which does nothing. If the for-loop cannot find any valid task id, the null task is chosen.
+In this project, Task ID 0 always belongs to a null task, which does nothing. If the for-loop cannot find any valid task id, the null task is chosen.
 
 ### Future Work
 The TCB can be enhanced to store more information about the task such as the access level. Information such as the maximum stack depth can also be stored in the TCB. This information will be helpful in figuring out if the allocated stack for a task is enough or not.
