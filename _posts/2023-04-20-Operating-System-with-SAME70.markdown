@@ -90,6 +90,8 @@ The context switching procedure above does the following:
 * load 0xFFFFFFFD onto LR (thread mode with PSP)
 * return from the exception
 
+Upon returning from the exception, since the LR value was set to be 0xFFFFFFFD, the processor uses PSP to pop the values from the stack ```xPSR```, ```PC```, ```R0-R3``` and ```R12```.
+
 I have implemented a cooperative round-robin scheduler. Each task calls ```task_yield```. When a task calls ```task_yield```, the scheduler finds another task available and switches the context to the next task.
 
 ### Future Work
